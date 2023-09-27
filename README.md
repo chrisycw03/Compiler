@@ -5,12 +5,12 @@ This program is a simple compiler for C language(a simple languge C0). The main 
 - [Assember](#assembler)
 - [Virtual Machine](#virtual-machine)
 
-The C0 program will be compiled to assembly file. The assembly file will be converted to object file by the assembler. Virtual machine will execute the object file and display the result.
+The C0 program will be compiled to assembly file. The assembly file will be converted to object file by the assembler. Virtual machine will execute the object file and display the result. An [Example](#an-example-of-complete-progress) of the whole progress from compoiling C0 program to execution is dispalyed in this article.
 
-The C0 language supports,
-- assignment
-- integer arithmetic operation
-- for loop
+The C-like simple language C0 supports,
+- Assignment
+- Integer arithmetic operation
+- For loop
 
 This program also contains following labraries of data structure used by the compiler and their operations,
 - Array
@@ -19,17 +19,16 @@ This program also contains following labraries of data structure used by the com
 
 # Compiler
 
-The main function of Compiler is to compile the C0 language file, and export an assembly code file. The compiler consists of:
-- Scanner
-- Parser
-- Generator
+The main function of Compiler is to compile the C0 program, and export an assembly code file. The compiler consists of:
+- [Scanner](#scanner)
+- [Parser](#parser)
+- [Generator](#generator)
 
-Text of C0 file is divided into tokens by Scanner. Parser will generate a syntax tree from an Array of tokens. Syntax tree will be translated to P-code then to assembly code by Generator.
+Text of C0 language is divided into tokens by Scanner. Parser will generate a syntax tree from an Array of tokens. Syntax tree will be translated to P-code then to assembly code by Generator.
 
-## Scanner(Lexer)
+## Scanner
 
-Scanner imported a C0 language file and returned an Array of tokens. The progress is shown as below,
-
+Scanner imported a C0 program file and returned an Array of tokens. The progress is shown as below,
 1. Construct an Array to store tokens of C0 file.
 2. Construct a Scanner to read the text of C0 file.
 3. Scanner scanned C0 file according to the types of token and push to the Array.
@@ -50,13 +49,14 @@ Types of token is shown as following table,
 | ITEM     | id, number, string         |
 | OP       | +, -, \*, \/, <, =, >, !   |
 | OTHERS   | {}, (), ...                |
-\* repeats more than 0 times
+
+- \* repeats more than 0 times
 
 ### Example
 
 A C0 code ```sum = sum + i``` could be divided as following table,
 | Token | sum |  =  | sum |  +  |  i  |
-|:-----:|:---:|:---:|:--- |:---:|:---:|
+|:-----:|:---:|:---:|:---:|:---:|:---:|
 | Type  | id  |  =  | id  |  +  | id  |
 
 
@@ -68,7 +68,7 @@ The Parser created a syntax tree from Array of tokens. We use EBNF to desribe Sy
 | --- |:----------- |:-------------------------------------------------- |
 | 1   | PROG        | BaseList                                           |
 | 2   | BaseList    | (BASE)\*                                           |
-| 3   | BASE        | FOR \| STMT                                        |
+| 3   | BASE        | FOR \| STMT ';'                                    |
 | 4   | FOR         | 'for''('STMT';' COND';' STMT')' BLOCK              |
 | 5   | STMT        | 'return 'id \| id'='EXP \| id('++' \| '--')        |
 | 6   | BLOCK       | '{'BaseList'}'                                     |
@@ -78,11 +78,11 @@ The Parser created a syntax tree from Array of tokens. We use EBNF to desribe Sy
 | 10  | id          | [A-Za-z_][A-Za-z0-9_]*                             |
 | 11  | number      | [0-9]+                                             |
 
-\* repeats more than 0 times
-\+ repeats more than 1 times
-\? appears 0 or 1 time
+- \* repeats more than 0 time
+- \+ repeats more than 1 time
+- \? appears 0 or 1 time
 
-According syntax rule, we could create a syntax tree as an example below,
+According syntax rule, we could create a syntax tree of ```sum = sum + i``` as below,
 
 ```mermaid
 flowchart LR
@@ -105,27 +105,32 @@ ITEM2-->ID3[id:i]
 
 Generator converted syntax tree to P-code, then to assembly code. syntax tree will be traversed by recursion, and translate each node to P-code. Below is an example to show format of P-code,
 
-| Label | Operator | Parameter 1 | Parameter 2 | Parameter 3 | C0 code  |
-|:----- | -------- | ----------- | ----------- |:----------- |:-------- |
-|       | =        | sum         | 0           |             | sum = 0; |
-|       | +        | i           | 1           | i           | i++;     |
-| FOR0: |          |             |             |             |          |
+| C0 code        | Label | Operator | Parameter 1 | Parameter 2 | Parameter 3 |
+|:-------------- |:----- | -------- | ----------- | ----------- |:----------- |
+| ```sum = 0;``` |       | =        | sum         | 0           |             |
+| ```i++;```     |       | +        | i           | 1           | i           |
+|                | FOR0: |          |             |             |             |
 
-All variables in use will be put in Symbol Table, which is a Hash Table storing name of each variable. Generator will then translate P-code and Symbol Table to assembly code. 
+All variables in use will be put in Symbol Table, which is a Hash Table storing name of each variable.
 
-Length of an instruciton of assembly code is 32 bits. Instructions are sorted into 3 formats, Arithmatic type, Load and Store type, and Jump type. The formats are,
+Length of an instruciton of assembly code is 32 bits. Instructions are sorted into 3 formats, **Arithmatic type**, **Load and Store type**, and **Jump type**. The formats are,
 
-| Type | Format                                                                           |
-| ---- |:-------------------------------------------------------------------------------- |
-| A    | OP(31-24 bit) \| Ra(23-20 bit) \| Rb(19-16 bit) \| Rc(15-12 bit) \| Cx(12-0 bit) |
-| L    | OP(31-24 bit) \| Ra(23-20 bit) \| Rb(19-16 bit) \| Cx(15-0 bit)                  |
-| J    | OP(31-24 bit) \| Ra(23-20 bit) \| Cx(19-0 bit)                                   |
+| Type | Format (bit)                                                                        |
+| ---- |:----------------------------------------------------------------------------------- |
+| A    | ```OP (31-24)``` ```Ra (23-20)``` ```Rb (19-16)``` ```Rc (15-12)``` ```Cx (12-0)``` |
+| L    | ```OP (31-24)``` ```Ra (23-20)``` ```Rb (19-16)``` ```Cx (15-0)```                  |
+| J    | ```OP (31-24)``` ```Ra (23-20)``` ```Cx (19-0)```                                   |
 
-An Op Table is required to record all instruction, their syntax and the corresponded code. Then, P-code could be transformed to a series of instructions according to the corresponed instructions in Op Table.
+An Op Table is required to record all instructions, their syntax and operation code. Now, Generator could translate each line of P-code to a series of assembly code according to the Op Table. In addition, all variables used should be tranlated to assembly code. Following is a simple example,
+
+| C0 code          | P-Code               | Assembly Code                                   |
+| :--------------- | :------------------- | :---------------------------------------------- |
+| ```res = 10```   | ```=    10    res``` | ```LDI    R1    10```<br/>```ST    R1    res``` |
+| ```return res``` | ```RET    res```     | ```LD    R1    sum```<br/>```RET```             |
 
 # Assembler
 
-Here is an example of an assembly code translate to object code,
+Here is an example of an assembly code translated to object code,
 | Address | Assembly Code | Object Code |
 | ------- | ------------- | ----------- |
 | 0000    | LD R1 B       | 001F000C    |
@@ -145,9 +150,6 @@ In second stage,
 4. convert parameters, Ra, Rb, Rc, Cx to object code
 5. convert data to binary
 6. generate object code to object file
-
-
-
 
 # Virtual Machine
 
@@ -442,8 +444,8 @@ Assembler translate assembly file to object file in 2 stage.
 
 ## Virtual Machine
 
-Operations of the virtual machine are too long to display here.
-However, the register dump of the simulated CPU is,
+Operation of each instruction of the virtual machine is too long to display here.
+However, the register dump of the simulated CPU is shown as below. The program returned the sum of integer from 1 to 10, so the register R1 load the value of "sum" (```R[01]=0x00000037=55```).
 
 ```
 IR =0x2c000000=738197504
@@ -464,7 +466,6 @@ R[13]=0x00000000=0
 R[14]=0xffffffff=-1
 R[15]=0x00000054=84
 ```
-The program returned the sum of integer from 1 to 10, so the register R1 load the value of sum (= 55).
 
 # Reference
 
