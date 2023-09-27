@@ -5,15 +5,14 @@ This program is a simple compiler for C language(a simple languge C0). The main 
 - Assember
 - Virtual Machine
 
-The C0 language will be compiled to assembly file. The assembly file will be converted to object file by the assembler. Virtual machine will execute the object file and display the result.
+The C0 program will be compiled to assembly file. The assembly file will be converted to object file by the assembler. Virtual machine will execute the object file and display the result.
 
 The C0 language supports,
 - assignment
-- arithmetic operation
+- integer arithmetic operation
 - for loop
 
 This program also contains following labraries of data structure used by the compiler and their operations,
-
 - Array
 - Tree
 - HashTable
@@ -443,7 +442,8 @@ Assembler translate assembly file to object file in 2 stage.
 
 ## Virtual Machine
 
-Operations of the virtual machine are too long to display here. The register dump of the simulated CPU is,
+Operations of the virtual machine are too long to display here.
+However, the register dump of the simulated CPU is,
 
 ```
 IR =0x2c000000=738197504
@@ -464,6 +464,7 @@ R[13]=0x00000000=0
 R[14]=0xffffffff=-1
 R[15]=0x00000054=84
 ```
+The program returned the sum of integer from 1 to 10, so the register R1 load the value of sum (= 55).
 
 # Reference
 
