@@ -1,9 +1,9 @@
 # Overview
 
 This program is a simple compiler for C language(a simple languge C0). The main target is to display how a system program works. It was developed by C language and consists of:
-- Compiler
-- Assember
-- Virtual Machine
+- [Compiler](#compiler)
+- [Assember](#assembler)
+- [Virtual Machine](#virtual-machine)
 
 The C0 program will be compiled to assembly file. The assembly file will be converted to object file by the assembler. Virtual machine will execute the object file and display the result.
 
